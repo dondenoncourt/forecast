@@ -1,0 +1,77 @@
+Metrics:
+  Enabled: false
+Style/MutableConstant:
+  Enabled: false
+Style/FrozenStringLiteralComment:
+  Enabled: false
+Style/Documentation:
+  Enabled: false
+Layout/FirstHashElementIndentation:
+  Enabled: true
+  EnforcedStyle: consistent
+  IndentationWidth: ~
+Layout/ArgumentAlignment:
+  Enabled: true
+  EnforcedStyle: with_fixed_indentation
+Style/GuardClause:
+  Enabled: false
+Style/IfUnlessModifier:
+  Enabled: false
+Style/Next:
+  Enabled: false
+Style/NegatedIf:
+  Enabled: false
+Style/StringLiterals:
+  Enabled: false
+Style/HashAsLastArrayItem:
+  Enabled: false
+Style/SymbolArray:
+  Enabled: false
+Lint/PercentStringArray:
+  Enabled: false
+Style/WordArray:
+  Enabled: false
+Layout/MultilineMethodCallIndentation:
+  Enabled: true
+  EnforcedStyle: indented
+  IndentationWidth: ~
+Layout/CaseIndentation:
+  Enabled: false
+Layout/EndAlignment:
+  Enabled: true
+  EnforcedStyleAlignWith: variable
+Layout/DotPosition:
+  Enabled: false
+Layout/MultilineOperationIndentation:
+  Enabled: true
+  EnforcedStyle: indented
+  IndentationWidth: ~
+Style/ModuleFunction:
+  Enabled: false
+Layout/FirstArrayElementIndentation:
+  Enabled: true
+  EnforcedStyle: consistent
+  IndentationWidth: ~
+Style/MultilineBlockChain:
+  Enabled: false
+Style/BlockDelimiters:
+  Enabled: false
+AllCops:
+  NewCops: disable
+  SuggestExtensions: false
+Style/NumericPredicate:
+  Enabled: false
+Style/ClassAndModuleChildren:
+  Enabled: false
+Style/RescueStandardError:
+  Enabled: false
+Layout/ArrayAlignment:
+  Enabled: false
+Layout/BlockAlignment:
+  Enabled: false
+Lint/MissingSuper:
+  Enabled: false
+Naming/VariableNumber:
+  Enabled: false
+Naming/PredicatePrefix:
+  Enabled: false
