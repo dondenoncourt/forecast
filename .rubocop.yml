@@ -1,3 +1,6 @@
+require:
+  - rubocop-rails
+
 Metrics:
   Enabled: false
 Style/MutableConstant:
@@ -59,6 +62,12 @@ Style/BlockDelimiters:
 AllCops:
   NewCops: disable
   SuggestExtensions: false
+  Exclude:
+    - 'Gemfile'
+    - 'Gemfile.lock'
+    - 'db/schema.rb'
+    - 'config/**/*'
+    - 'bin/**/*'
 Style/NumericPredicate:
   Enabled: false
 Style/ClassAndModuleChildren:

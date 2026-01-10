@@ -47,9 +47,13 @@ gem "bootsnap", require: false
 gem 'rubocop', '~> 1.30', require: false
 gem 'rubocop-rails', '2.19.1'
 
+# HTTP client for weather API
+gem "httparty"
+
 group :development, :test do
   # see https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ]
+  gem 'byebug'
 end
 
 group :development do
@@ -70,4 +74,6 @@ group :test do
   # use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
   gem "selenium-webdriver"
+  gem "rspec-rails", "~> 7.0"
+  gem "simplecov", require: false
 end
