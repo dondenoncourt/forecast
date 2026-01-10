@@ -40,19 +40,21 @@ class ForecastService
   # @param query [String] Location name ("New York", "London")
   # @return [Array] Array of location results with coordinates
   def self.search_location(query)
+    original_query = query.dup
     zipcode = query.match?(/\A\d+\z/)
     if zipcode && query.length != 5
       raise ArgumentError, "Zipcode must be 5 digits"
     end
 
     # If query is not all numeric, validate format: "city, 2-digit state code"
-    if !zipcode && !query.match?(/\A.+, [A-Z]{2}\z/)
+    if !zipcode && !query.match?(/\A.+, [A-Za-z]{2}\z/)
       raise ArgumentError, "Query must be a 5-digit zipcode or in the format 'City, ST' (e.g., 'New York, NY')"
     end
 
     if !zipcode
       city, state = query.split(/,\ /)
       query = city
+      state = state.upcase
     end
 
     response = HTTParty.get('https://geocoding-api.open-meteo.com/v1/search', query: {
