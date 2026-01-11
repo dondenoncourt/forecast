@@ -51,6 +51,7 @@ gem 'rubocop-rails', '2.19.1'
 gem "httparty"
 
 gem 'cssbundling-rails'
+gem 'rails-controller-testing'
 
 group :development, :test do
   # see https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

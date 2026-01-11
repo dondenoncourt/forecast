@@ -8,29 +8,42 @@ class ForecastService
   # Get current weather and forecast for a location
   # @param latitude [Float] Latitude of the location
   # @param longitude [Float] Longitude of the location
+  # @param zip [String] Zipcode of the location
   # @param days [Integer] Number of forecast days (default: 1, max: 16)
   # @return [Hash] Weather data including current conditions and forecast
-  def self.forecast(latitude:, longitude:, days: 1)
+  def self.forecast(latitude:, longitude:, zip:, days: 1)
     days = [days, 16].min # API max is 16 days
 
-    # Both current and hourly parameters are defined at
-    #   https://open-meteo.com/en/docs?hourly=#hourly_parameter_definition
-    response = get('/forecast', query: {
-      latitude: latitude,
-      longitude: longitude,
-      temperature_unit: 'fahrenheit',
-      wind_speed_unit: 'mph',
-      precipitation_unit: 'inch',
-      current: 'temperature_2m,weather_code,relative_humidity_2m',
-      hourly: 'temperature_2m,weather_code,precipitation_probability',
-      timezone: 'auto',
-      forecast_days: days
-    })
+    cache_key = "forecast_#{zip}"
 
-    if response.success?
-      parse_response(response)
+    # Check if cache exists before fetching
+    cached = Rails.cache.exist?(cache_key)
+
+    forecast_data = Rails.cache.fetch(cache_key, expires_in: Rails.application.config.forecast_cache_expiration) do
+      response = get('/forecast', query: {
+        latitude: latitude,
+        longitude: longitude,
+        temperature_unit: 'fahrenheit',
+        wind_speed_unit: 'mph',
+        precipitation_unit: 'inch',
+        current: 'temperature_2m,weather_code,relative_humidity_2m',
+        hourly: 'temperature_2m,weather_code,precipitation_probability',
+        timezone: 'auto',
+        forecast_days: days
+      })
+
+      if response.success?
+        parse_response(response)
+      else
+        { error: "Failed to fetch weather data: #{response.code}" }
+      end
+    end
+
+    # Add cache indicator to the result
+    if forecast_data.is_a?(Hash) && !forecast_data[:error]
+      forecast_data.merge(cached: cached)
     else
-      { error: "Failed to fetch weather data: #{response.code}" }
+      forecast_data
     end
   rescue => e
     { error: "Forecast API error: #{e.message}" }
@@ -41,13 +54,8 @@ class ForecastService
   # @return [Array] Array of location results with :name, :country, :latitude, :longitude, :admin1 keys
   def self.search_location(query)
     address = parse_address(query)
-    if address[:error]
-      raise ArgumentError, "Invalid address format: #{query}"
-    end
+    raise ArgumentError, "Invalid address format: #{query}" if address[:error]
 
-    street = address[:street]
-    city = address[:city]
-    state = address[:state]
     zip = address[:zip]
 
     response = HTTParty.get('https://geocoding-api.open-meteo.com/v1/search', query: {
@@ -65,13 +73,10 @@ class ForecastService
           country: result['country'],
           latitude: result['latitude'],
           longitude: result['longitude'],
-          admin1: result['admin1'] # State/Province
+          state: result['admin1'],
+          zip: result['postcode'] || zip
         }
       end
-      # if !zipcode
-      #   results = results.select { |result| result[:admin1] == US_STATES[state] }
-      # end
-
     else
       []
     end

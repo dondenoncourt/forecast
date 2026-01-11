@@ -9,5 +9,4 @@ Rails.application.routes.draw do
   # root "posts#index"
 
   get "forecast" => "forecast#show"
-  get "forecast/search" => "forecast#search"
 end
