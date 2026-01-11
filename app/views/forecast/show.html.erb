@@ -28,6 +28,11 @@
             <h2 class="card-title h4 mb-3">Current Conditions</h2>
             <div class="text-center mb-3">
               <p class="mb-0 fw-bold fs-4"><%= @query %></p>
+              <% if @forecast[:cached] %>
+                <span class="badge bg-info bg-opacity-50 text-white mt-2" style="font-size: 1.5rem;">Pulled from cache</span>
+              <% else %>
+                <span class="badge bg-success bg-opacity-50 text-white mt-2" style="font-size: 1.5rem;">Accessed from API</span>
+              <% end %>
             </div>
             <% if @forecast[:current] %>
               <div class="display-1 fw-bold my-3">
@@ -35,7 +40,6 @@
               </div>
               <div class="d-flex justify-content-around mt-4">
                 <p class="mb-0 opacity-75">Humidity: <%= @forecast[:current][:humidity] %>%</p>
-                <p class="mb-0 opacity-75">Wind Speed: <%= @forecast[:current][:wind_speed] %> mph</p>
               </div>
             <% end %>
           </div>

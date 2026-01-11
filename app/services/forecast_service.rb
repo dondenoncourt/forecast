@@ -16,7 +16,10 @@ class ForecastService
 
     cache_key = "forecast_#{zip}"
 
-    Rails.cache.fetch(cache_key, expires_in: Rails.application.config.forecast_cache_expiration) do
+    # Check if cache exists before fetching
+    cached = Rails.cache.exist?(cache_key)
+
+    forecast_data = Rails.cache.fetch(cache_key, expires_in: Rails.application.config.forecast_cache_expiration) do
       response = get('/forecast', query: {
         latitude: latitude,
         longitude: longitude,
@@ -34,6 +37,13 @@ class ForecastService
       else
         { error: "Failed to fetch weather data: #{response.code}" }
       end
+    end
+
+    # Add cache indicator to the result
+    if forecast_data.is_a?(Hash) && !forecast_data[:error]
+      forecast_data.merge(cached: cached)
+    else
+      forecast_data
     end
   rescue => e
     { error: "Forecast API error: #{e.message}" }

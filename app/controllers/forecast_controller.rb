@@ -3,8 +3,6 @@ class ForecastController < ApplicationController
   # Example: GET /forecast?q=23192 or GET /forecast?q=New York, NY
   def show
     query = params[:q]
-    latitude = params[:lat]&.to_f
-    longitude = params[:lon]&.to_f
 
     @forecast = if query.present?
       @query = query
@@ -20,8 +18,6 @@ class ForecastController < ApplicationController
       rescue ArgumentError => e
         { error: e.message }
       end
-    elsif latitude && longitude
-      ForecastService.forecast(latitude: latitude, longitude: longitude, zip: location[:zip])
     else
       { error: "Please provide a location query (q), or latitude and longitude parameters" }
     end
@@ -29,22 +25,6 @@ class ForecastController < ApplicationController
     respond_to do |format|
       format.html
       format.json { render json: @forecast }
-    end
-  end
-
-  # Example: GET /forecast/search?q=New York
-  def search
-    query = params[:q]
-
-    @locations = if query.present?
-      ForecastService.search_location(query)
-    else
-      []
-    end
-
-    respond_to do |format|
-      format.html
-      format.json { render json: @locations }
     end
   end
 end
