@@ -8,9 +8,9 @@ Things you may want to cover:
 * Ruby version
 3.2.9
 
-![UI invokes Forecast API](/public/forecast UI API called.png)
-![Backend used cached Forecast data](/public/forecast UI used cache.png)
-![Code coverage](/public/forecast code coverage.png)
+![UI invokes Forecast API](/public/forecast-UI-API-called.png)
+![Backend used cached Forecast data](/public/forecast-UI-used-cache.png)
+![Code coverage](/public/forecast-code-coverage.png)
 
 * System dependencies
 
