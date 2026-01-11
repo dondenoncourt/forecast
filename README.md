@@ -30,7 +30,7 @@ The JSON data is cached via the integrated [Rails cache](https://guides.rubyonra
 
 `rspec spec`
 
-* Services (job queues, cache servers, search engines, etc.)
+* Services 
 
 The `ForcastService` class uses the 
 [Open-Meteo](https://open-meteo.com/en/docs?hourly=#api_documentation)
