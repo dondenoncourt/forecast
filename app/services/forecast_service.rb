@@ -8,19 +8,15 @@ class ForecastService
   # Get current weather and forecast for a location
   # @param latitude [Float] Latitude of the location
   # @param longitude [Float] Longitude of the location
-  # @param zip [String] Zipcode of the location (optional, used for caching)
+  # @param zip [String] Zipcode of the location
   # @param days [Integer] Number of forecast days (default: 1, max: 16)
   # @return [Hash] Weather data including current conditions and forecast
   def self.forecast(latitude:, longitude:, zip:, days: 1)
     days = [days, 16].min # API max is 16 days
 
     cache_key = "forecast_#{zip}"
-    Rails.logger.info("ForecastService.forecast called for #{cache_key}")
-    puts "ForecastService.forecast called for #{cache_key}"
 
     Rails.cache.fetch(cache_key, expires_in: Rails.application.config.forecast_cache_expiration) do
-      Rails.logger.info("Cache MISS - Fetching forecast from API for #{cache_key}")
-      puts "Cache MISS - Fetching forecast from API for #{cache_key}"
       response = get('/forecast', query: {
         latitude: latitude,
         longitude: longitude,
@@ -48,13 +44,8 @@ class ForecastService
   # @return [Array] Array of location results with :name, :country, :latitude, :longitude, :admin1 keys
   def self.search_location(query)
     address = parse_address(query)
-    if address[:error]
-      raise ArgumentError, "Invalid address format: #{query}"
-    end
+    raise ArgumentError, "Invalid address format: #{query}" if address[:error]
 
-    street = address[:street]
-    city = address[:city]
-    state = address[:state]
     zip = address[:zip]
 
     response = HTTParty.get('https://geocoding-api.open-meteo.com/v1/search', query: {
@@ -73,7 +64,7 @@ class ForecastService
           latitude: result['latitude'],
           longitude: result['longitude'],
           state: result['admin1'],
-          zip: result['postcode']
+          zip: result['postcode'] || zip
         }
       end
     else

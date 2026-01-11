@@ -28,6 +28,74 @@ RSpec.describe ForecastService do
         expect(result[:location][:longitude]).to be_a(Float)
         expect(result[:location][:timezone]).to be_a(String)
       end
+
+      it 'caches the forecast result and returns cached value on subsequent calls' do
+        # Enable caching for this test (test environment uses :null_store by default)
+        original_cache_store = Rails.cache
+        begin
+          Rails.cache = ActiveSupport::Cache::MemoryStore.new
+
+          cache_key = "forecast_#{zipcode}"
+
+          Rails.cache.clear
+          expect(Rails.cache.exist?(cache_key)).to be false
+
+          # First call - call API and cache
+          first_result = described_class.forecast(latitude: latitude, longitude: longitude, zip: zipcode)
+          expect(first_result).to be_a(Hash)
+          expect(first_result[:current]).to be_a(Hash)
+          expect(Rails.cache.exist?(cache_key)).to be true
+          cached_value = Rails.cache.read(cache_key)
+          expect(cached_value).to eq(first_result)
+
+          # Second call - should use cached value
+          second_result = described_class.forecast(latitude: latitude, longitude: longitude, zip: zipcode)
+
+          expect(second_result).to eq(first_result)
+          expect(second_result[:current][:temperature]).to eq(first_result[:current][:temperature])
+          expect(second_result[:current][:time]).to eq(first_result[:current][:time])
+
+          expect(Rails.cache.exist?(cache_key)).to be true
+        ensure
+          Rails.cache = original_cache_store
+        end
+      end
+
+      it 'uses different cache keys for different zip codes' do
+        # Enable caching for this test (test environment uses :null_store by default)
+        original_cache_store = Rails.cache
+        begin
+          Rails.cache = ActiveSupport::Cache::MemoryStore.new
+
+          address2 = '123 Main St, Los Angeles, CA 90210'
+          location_result2 = described_class.search_location(address2)
+          zipcode2 = location_result2.first[:zip]
+          cache_key = "forecast_#{zipcode}"
+          cache_key2 = "forecast_#{zipcode2}"
+
+          # Clear cache
+          Rails.cache.clear
+
+          # Call with first zip
+          described_class.forecast(latitude: latitude, longitude: longitude, zip: zipcode)
+          expect(Rails.cache.exist?(cache_key)).to be true
+          expect(Rails.cache.exist?(cache_key2)).to be false
+
+          # Call with second zip
+          described_class.forecast(
+            latitude: location_result2.first[:latitude],
+            longitude: location_result2.first[:longitude],
+            zip: zipcode2
+          )
+          expect(Rails.cache.exist?(cache_key)).to be true
+          expect(Rails.cache.exist?(cache_key2)).to be true
+
+          # Verify they are different cached values
+          expect(Rails.cache.read(cache_key)).not_to eq(Rails.cache.read(cache_key2))
+        ensure
+          Rails.cache = original_cache_store
+        end
+      end
     end
   end
 
