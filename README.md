@@ -41,4 +41,4 @@ The API requires a longitude and latitude which are retrieved from the address v
 
 [RDoc Documentation](doc/index.html) - View the generated API documentation as HTML.
 Here is a 
-![sample page](/public/RDOC-sample.png)
+![sample page](/public/RDoc-sample.png)
