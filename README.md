@@ -27,8 +27,7 @@ Code Coverage was implemented and here's a sample report:
 * Database creation
 The application was configured for PostgreSQL but it does not use any database data.
 The "data" for the application is JSON returned from the Open-Meteo API. 
-It is cached via the integrated Rails cache.
-![Rails cache](https://guides.rubyonrails.org/v2.3.9/caching_with_rails.html#:~:text=ActionController::Base.,updated_at%20timestamp%20(if%20available).)
+It is cached via the integrated [Rails cache](https://guides.rubyonrails.org/v2.3.9/caching_with_rails.html#:~:text=ActionController::Base.,updated_at%20timestamp%20(if%20available).)
 
 * Database initialization
 None required.
