@@ -6,11 +6,14 @@
     <div class="mb-4">
       <%= form_with url: forecast_path, method: :get, local: true, class: "d-flex gap-2 justify-content-center" do |f| %>
         <%= f.text_field :q, 
-            placeholder: "Enter zipcode or City, ST (e.g., 23192 or New York, NY)", 
+            placeholder: "street, city, state abbreviation, and ZIP code", 
             class: "form-control",
             style: "max-width: 400px;" %>
         <%= f.submit "Get Forecast", class: "btn btn-light" %>
       <% end %>
+      <p class="fs-6 mb-4 opacity-75">
+        Separate by comma, e.g.: 123 Main St Apt 4B, Anytown, CA 90210
+      </p>
     </div>
     
     <% if @forecast[:error] %>
