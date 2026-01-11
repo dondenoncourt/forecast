@@ -36,29 +36,22 @@ class ForecastService
     { error: "Forecast API error: #{e.message}" }
   end
 
-  # Search for location by name
-  # @param query [String] Location name ("New York", "London")
-  # @return [Array] Array of location results with coordinates
+  # Search for location by zipcode parsed from address
+  # @param query [String] Address in format "123 Main St Apt 4B, Anytown, CA 90210"
+  # @return [Array] Array of location results with :name, :country, :latitude, :longitude, :admin1 keys
   def self.search_location(query)
-    original_query = query.dup
-    zipcode = query.match?(/\A\d+\z/)
-    if zipcode && query.length != 5
-      raise ArgumentError, "Zipcode must be 5 digits"
+    address = parse_address(query)
+    if address[:error]
+      raise ArgumentError, "Invalid address format: #{query}"
     end
 
-    # If query is not all numeric, validate format: "city, 2-digit state code"
-    if !zipcode && !query.match?(/\A.+, [A-Za-z]{2}\z/)
-      raise ArgumentError, "Query must be a 5-digit zipcode or in the format 'City, ST' (e.g., 'New York, NY')"
-    end
-
-    if !zipcode
-      city, state = query.split(/,\ /)
-      query = city
-      state = state.upcase
-    end
+    street = address[:street]
+    city = address[:city]
+    state = address[:state]
+    zip = address[:zip]
 
     response = HTTParty.get('https://geocoding-api.open-meteo.com/v1/search', query: {
-      name: query,
+      name: zip,
       count: 10,
       language: 'en',
       format: 'json',
@@ -66,7 +59,7 @@ class ForecastService
     })
 
     if response.success? && response['results']
-      results = response['results'].map do |result|
+      response['results'].map do |result|
         {
           name: result['name'],
           country: result['country'],
@@ -75,10 +68,10 @@ class ForecastService
           admin1: result['admin1'] # State/Province
         }
       end
-      if !zipcode
-        results = results.select { |result| result[:admin1] == US_STATES[state] }
-      end
-      results
+      # if !zipcode
+      #   results = results.select { |result| result[:admin1] == US_STATES[state] }
+      # end
+
     else
       []
     end
@@ -88,6 +81,9 @@ class ForecastService
     { error: "Geocoding API error: #{e.message}" }
   end
 
+  # Parse response from OpenMeteo API (https://open-meteo.com/en/docs?hourly=#api_documentation)
+  # @param API response from API
+  # @return [Hash] with :current, :hourly, :location keys
   def self.parse_response(response)
     {
       current: {
@@ -98,7 +94,6 @@ class ForecastService
         time: response['current']['time']
       },
       hourly: parse_hourly(response['hourly']),
-      # daily: parse_daily(response['daily']),
       location: {
         latitude: response['latitude'],
         longitude: response['longitude'],
@@ -107,6 +102,9 @@ class ForecastService
     }
   end
 
+  # Parse hourly data
+  # @param hourly_data [Hash] Address in format "123 Main St Apt 4B, Anytown, CA 90210"
+  # @return [Array] of hashes with :time, :temperature, :weather_code, :precipitation_probability keys
   def self.parse_hourly(hourly_data)
     return [] unless hourly_data
 
@@ -118,5 +116,32 @@ class ForecastService
         precipitation_probability: hourly_data['precipitation_probability'][index]
       }
     end
+  end
+
+  # Parse full address
+  # @param address [String] Address in format "123 Main St Apt 4B, Anytown, CA 90210"
+  # @return [Hash] Hash with :street, :city, :state, :zip keys
+  def self.parse_address(address)
+    parts = address.split(/,\s+/)
+
+    return { error: "Invalid address format" } if parts.length < 3
+
+    street = parts[0].strip
+    city = parts[1].strip
+    state_zip = parts[2].strip
+
+    state_zip_match = state_zip.match(/\A([A-Z]{2})\s+(\d{5})\z/)
+
+    if state_zip_match
+      state = state_zip_match[1]
+      zip = state_zip_match[2]
+    end
+
+    {
+      street: street,
+      city: city,
+      state: state,
+      zip: zip
+    }
   end
 end

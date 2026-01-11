@@ -9,12 +9,16 @@ class ForecastController < ApplicationController
     @forecast = if query.present?
       @query = query
       # Search for location and get forecast from first result
-      locations = ForecastService.search_location(query)
-      if locations.is_a?(Array) && locations.any?
-        location = locations.first
-        ForecastService.forecast(latitude: location[:latitude], longitude: location[:longitude])
-      else
-        { error: "Location not found. Please try a different search." }
+      begin
+        locations = ForecastService.search_location(query)
+        if locations.is_a?(Array) && locations.any?
+          location = locations.first
+          ForecastService.forecast(latitude: location[:latitude], longitude: location[:longitude])
+        else
+          { error: "Location not found. Please try a different search." }
+        end
+      rescue ArgumentError => e
+        { error: e.message }
       end
     elsif latitude && longitude
       ForecastService.forecast(latitude: latitude, longitude: longitude)
