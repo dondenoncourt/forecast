@@ -8,29 +8,36 @@ class ForecastService
   # Get current weather and forecast for a location
   # @param latitude [Float] Latitude of the location
   # @param longitude [Float] Longitude of the location
+  # @param zip [String] Zipcode of the location (optional, used for caching)
   # @param days [Integer] Number of forecast days (default: 1, max: 16)
   # @return [Hash] Weather data including current conditions and forecast
-  def self.forecast(latitude:, longitude:, days: 1)
+  def self.forecast(latitude:, longitude:, zip:, days: 1)
     days = [days, 16].min # API max is 16 days
 
-    # Both current and hourly parameters are defined at
-    #   https://open-meteo.com/en/docs?hourly=#hourly_parameter_definition
-    response = get('/forecast', query: {
-      latitude: latitude,
-      longitude: longitude,
-      temperature_unit: 'fahrenheit',
-      wind_speed_unit: 'mph',
-      precipitation_unit: 'inch',
-      current: 'temperature_2m,weather_code,relative_humidity_2m',
-      hourly: 'temperature_2m,weather_code,precipitation_probability',
-      timezone: 'auto',
-      forecast_days: days
-    })
+    cache_key = "forecast_#{zip}"
+    Rails.logger.info("ForecastService.forecast called for #{cache_key}")
+    puts "ForecastService.forecast called for #{cache_key}"
 
-    if response.success?
-      parse_response(response)
-    else
-      { error: "Failed to fetch weather data: #{response.code}" }
+    Rails.cache.fetch(cache_key, expires_in: Rails.application.config.forecast_cache_expiration) do
+      Rails.logger.info("Cache MISS - Fetching forecast from API for #{cache_key}")
+      puts "Cache MISS - Fetching forecast from API for #{cache_key}"
+      response = get('/forecast', query: {
+        latitude: latitude,
+        longitude: longitude,
+        temperature_unit: 'fahrenheit',
+        wind_speed_unit: 'mph',
+        precipitation_unit: 'inch',
+        current: 'temperature_2m,weather_code,relative_humidity_2m',
+        hourly: 'temperature_2m,weather_code,precipitation_probability',
+        timezone: 'auto',
+        forecast_days: days
+      })
+
+      if response.success?
+        parse_response(response)
+      else
+        { error: "Failed to fetch weather data: #{response.code}" }
+      end
     end
   rescue => e
     { error: "Forecast API error: #{e.message}" }
@@ -65,13 +72,10 @@ class ForecastService
           country: result['country'],
           latitude: result['latitude'],
           longitude: result['longitude'],
-          admin1: result['admin1'] # State/Province
+          state: result['admin1'],
+          zip: result['postcode']
         }
       end
-      # if !zipcode
-      #   results = results.select { |result| result[:admin1] == US_STATES[state] }
-      # end
-
     else
       []
     end

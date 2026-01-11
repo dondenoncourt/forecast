@@ -13,7 +13,7 @@ class ForecastController < ApplicationController
         locations = ForecastService.search_location(query)
         if locations.is_a?(Array) && locations.any?
           location = locations.first
-          ForecastService.forecast(latitude: location[:latitude], longitude: location[:longitude])
+          ForecastService.forecast(latitude: location[:latitude], longitude: location[:longitude], zip: location[:zip])
         else
           { error: "Location not found. Please try a different search." }
         end
@@ -21,7 +21,7 @@ class ForecastController < ApplicationController
         { error: e.message }
       end
     elsif latitude && longitude
-      ForecastService.forecast(latitude: latitude, longitude: longitude)
+      ForecastService.forecast(latitude: latitude, longitude: longitude, zip: location[:zip])
     else
       { error: "Please provide a location query (q), or latitude and longitude parameters" }
     end

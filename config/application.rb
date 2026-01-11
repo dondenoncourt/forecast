@@ -23,5 +23,6 @@ module Forecast
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+    config.cache_store = :memory_store
   end
 end

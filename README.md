@@ -29,3 +29,5 @@ https://open-meteo.com/
 https://open-meteo.com/en/docs
 https://open-meteo.com/en/docs?hourly=#api_documentation
 https://open-meteo.com/en/docs/geocoding-api
+
+caching: https://guides.rubyonrails.org/v2.3.9/caching_with_rails.html#:~:text=ActionController::Base.,updated_at%20timestamp%20(if%20available).
