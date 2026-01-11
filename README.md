@@ -38,6 +38,6 @@ None required.
 
 * Services (job queues, cache servers, search engines, etc.)
 The ForcastService class uses the 
-![Open-Meteo](https://open-meteo.com/en/docs?hourly=#api_documentation)
+[Open-Meteo](https://open-meteo.com/en/docs?hourly=#api_documentation)
 Weather Forecast API. It is free for non-commerical use.
-The API requires a longitude and latitude which are retrieved from the address via ![geocoding](https://open-meteo.com/en/docs/geocoding-api)
+The API requires a longitude and latitude which are retrieved from the address via [geocoding](https://open-meteo.com/en/docs/geocoding-api)
