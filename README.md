@@ -20,10 +20,6 @@ Code Coverage was implemented and here's a sample report:
 
 ![Code coverage](/public/forecast-code-coverage.png)
 
-* System dependencies
-
-* Configuration
-
 * Database creation
 The application was configured for PostgreSQL but it does not use any database data.
 The "data" for the application is JSON returned from the Open-Meteo API. 
@@ -40,3 +36,7 @@ The ForcastService class uses the
 [Open-Meteo](https://open-meteo.com/en/docs?hourly=#api_documentation)
 Weather Forecast API. It is free for non-commerical use.
 The API requires a longitude and latitude which are retrieved from the address via [geocoding](https://open-meteo.com/en/docs/geocoding-api)
+
+* Documentation
+
+[RDoc Documentation](doc/index.html) - View the generated API documentation.
